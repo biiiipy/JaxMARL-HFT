@@ -1,6 +1,6 @@
 # JaxMARL-HFT: GPU-Accelerated Multi-Agent Reinforcement Learning for High-Frequency Trading
 
-A JAX-based framework for multi-agent reinforcement learning for high-frequency trading, based on the JAX-LOB simulator and an extension of JaxMARL to the financial trading domain. 
+A JAX-based framework for multi-agent reinforcement learning for high-frequency trading, based on the [JAX-LOB simulator](https://github.com/KangOxford/jax-lob) and an extension of [JaxMARL](https://github.com/FLAIROx/JaxMARL) to the financial trading domain.
 
 ## Key Features
 
