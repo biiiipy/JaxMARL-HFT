@@ -6,18 +6,20 @@ Corresponding Author:
 Sascha Frey (sascha.frey@st-hughs.ox.ac.uk)
 Kang Li     (kang.li@keble.ox.ac.uk)
 Peer Nagy   (peer.nagy@reuben.ox.ac.uk)
-V1.0
+Valentin Mohl (valentin.mohl@cs.ox.ac.uk)
+Reuben Leyland (Reuben.leyland@sky.com)
 
 Module Description
-This module offers an advanced simulation environment for limit order books 
- using JAX for high-performance computations. It is designed for reinforcement
- learning applications in financial markets.
+This module provides the base simulation environment for limit order books 
+ using JAX for high-performance computations. It serves as the foundation for 
+ both single-agent and multi-agent reinforcement learning applications in 
+ financial markets, providing core order book simulation functionality.
 
 Key Components
-EnvState:   Dataclass to manage the state of the environment, 
-            including order book states, trade records, and timing information.
-EnvParams:  Configuration class for environment parameters, 
-            including message data, book data, and episode timing.
+LoadedEnvState:   Dataclass to manage the state of the environment, 
+                  including order book states, trade records, and timing information.
+LoadedEnvParams:  Configuration class for environment parameters, 
+                  including message data, book data, and episode timing.
 BaseLOBEnv: Main environment class inheriting from Gymnax's base environment, 
             providing methods for environment initialization, 
             stepping through time steps, and resetting the environment. 
@@ -37,15 +39,6 @@ reset_env:          Resets the environment to an initial state.
                     and sets the initial state.
 is_terminal:        Checks whether the current state is terminal, 
                     based on the elapsed time since the episode's start.
-get_obs:            Returns the current observation from environment's state.
-name:               Provides the name of the environment.
-num_actions:        Returns the number of possible actions in the environment.
-action_space:       Defines the action space of the environment, including 
-                    sides, quantities, and prices of actions.
-observation_space:  (Not implemented) Intended to define 
-                    the observation space of the environment.
-state_space:        Defines the state space of the environment, 
-                    including bids, asks, trades, and time.
 _get_data_messages: Fetches an array of messages for a given step 
                     within a data window.
 """
@@ -427,14 +420,14 @@ class BaseLOBEnv(environment.Environment):
             }
         )
 
-    #TODO: define obs space (4xnDepth) array of quants&prices. Not that important right now. 
+    # Not used.
     def observation_space(self, params: LoadedEnvParams):
         """Observation space of the environment."""
         return NotImplementedError
 
+    # Not used.
     def state_space(self, params: LoadedEnvParams) -> spaces.Dict:
-        """State space of the environment. #FIXME Samples absolute
-          nonsense, don't use.
+        """State space of the environment.  # Not used.
         """
         return spaces.Dict(
             {

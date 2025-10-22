@@ -5,11 +5,11 @@ A JAX-based framework for multi-agent reinforcement learning for high-frequency 
 ## Key Features
 
 - **GPU-Accelerated**: Built on JAX for high-performance parallel computation with JIT compilation
-- **Dual-Level Parallelization**: Parallel processing across episodes and agent types using `vmap`
+- **Two levels of Parallelization**: Parallel processing across episodes and agent types using `vmap`
 - **Multi-Agent RL**: Supports market making, execution, and directional trading agents
 - **LOBSTER Data Integration**: Real market data support with efficient GPU memory usage
 - **Scalable**: Handles thousands of parallel environments 
-- **Heterogeneous Agents**: Supports different observation/action spaces per agent type
+- **Heterogeneous Agents**: Supports different observation/action spaces
 
 ## Quick Start
 
@@ -51,6 +51,7 @@ python3 gymnax_exchange/jaxrl/MARL/ippo_rnn_JAXMARL.py
 - **Purpose**: Simple directional trading strategy
 - **Action Spaces**: Bid/ask at best prices or no action
 - **Reward Function**: Portfolio value
+- **Note:** Uses the same class as the market making agent
 
 ## Repository Structure
 
@@ -74,7 +75,7 @@ The framework uses a comprehensive configuration system with dataclasses for dif
 
 - **`MultiAgentConfig`**: Main configuration combining world and agent settings
 - **`World_EnvironmentConfig`**: Global environment parameters (data paths, episode settings, market hours)
-- **`MarketMaking_EnvironmentConfig`**: Market making (and directional trading) agent configuration (action spaces, reward functions, observation spaces)
+- **`MarketMaking_EnvironmentConfig`**: Market making and directional trading agent configuration (action spaces, reward functions, observation spaces)
 - **`Execution_EnvironmentConfig`**: Execution agent configuration (task types, action spaces, reward parameters)
 
 ### Training Configuration

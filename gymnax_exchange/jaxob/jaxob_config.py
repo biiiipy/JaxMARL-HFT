@@ -1,5 +1,4 @@
 import gymnax_exchange.jaxob.jaxob_constants as cst
-import gymnax_exchange.jaxob.jaxenv_constants as env_cst
 import os
 from typing import OrderedDict, Tuple,  Literal,Union,List
 
@@ -39,10 +38,10 @@ class MarketMaking_EnvironmentConfig():
     spread_multiplier: float = 3.0 #50.0
     skew_multiplier: float = 5.0 #100.0
     n_ticks_in_book : int = 1
-    num_messages_by_agent:int=env_cst.num_messages_by_agent
+    num_messages_by_agent:int=4
     num_action_messages_by_agent=2 # will be set automcatically down below
     fixed_quant_value:int=10
-    n_actions: int = env_cst.n_actions # Only used for fixed_prices
+    n_actions: int = 8 # Only used for fixed_prices
     debug_mode:bool=False
     time_delay_obs_act:int=0
     normalize:bool=True

@@ -6,41 +6,40 @@ Corresponding Author:
 Kang Li     (kang.li@keble.ox.ac.uk)
 Sascha Frey (sascha.frey@st-hughs.ox.ac.uk)
 Peer Nagy   (peer.nagy@reuben.ox.ac.uk)
-V1.0 
-
+Valentin Mohl (valentin.mohl@cs.ox.ac.uk)
+Reuben Leyland (Reuben.leyland@sky.com)
 
 
 
 Module Description
-This module extends the base simulation environment for limit order books 
- using JAX for high-performance computations, specifically tailored for 
- execution tasks in financial markets. It is particularly designed for 
- reinforcement learning applications focusing on 
- optimal trade execution strategies.
+This module provides an execution agent for multi-agent reinforcement learning 
+ in limit order book environments using JAX for high-performance computations. 
+ The ExecutionAgent is designed to work within a MARLEnv framework, 
+ specifically tailored for execution tasks in financial markets. 
+ It is particularly designed for multi-agent reinforcement learning applications 
+ focusing on optimal trade execution strategies.
 
 Key Components
-ExecEnvState:   Dataclass to encapsulate the current state of the environment, 
+ExecEnvState:   Dataclass to encapsulate the current state of the execution agent, 
             including the raw order book, trades, and time information.
-ExecEnvParams:  Configuration class for environment-specific parameters, 
+ExecEnvParams:  Configuration class for execution agent-specific parameters, 
             such as task details, message and book data, and episode timing.
-ExecutionAgent: Environment class inheriting from BaseLOBEnv, 
+ExecutionAgent: Agent class that works within the MARLEnv framework, 
               offering specialized methods for order placement and 
-              execution tasks in trading environments. 
+              execution tasks in multi-agent trading environments. 
 
 
 Functionality Overview
-__init__:           Initializes the execution environment, setting up paths 
-                    for data, action types, and task details. 
-                    It includes pre-processing and initialization steps 
-                    specific to execution tasks.
-default_params:     Returns the default parameters for execution environment,
+__init__:           Initializes the execution agent, setting up configuration 
+                    for action types and task details. It includes initialization 
+                    steps specific to execution tasks within the MARL framework.
+default_params:     Returns the default parameters for the execution agent,
                     adjusting for tasks such as buying or selling.
-step_env:           Advances the environment by processing actions and market 
-                    messages. It updates the state and computes the reward and 
-                    termination condition based on execution-specific criteria.
-reset_env:          Resets the environment to a state appropriate for a new 
-                    execution task. Initializes the order book and sets initial
-                    state specific to the execution context.
+step_env:           Processes actions and generates action messages for the 
+                    execution agent. It works within the MARLEnv framework to 
+                    contribute to the overall environment step.
+reset_env:          Resets the execution agent to a state appropriate for a new 
+                    execution task. Works in coordination with the MARLEnv reset.
 is_terminal:        Checks whether the current state is terminal, based on 
                     the number of steps executed or tasks completed.
 
@@ -48,28 +47,19 @@ action_space:       Defines the action space for execution tasks, including
                     order types and quantities.
 observation_space:  Define the observation space for execution tasks.
 
-state_space:        Describes the state space of the environment, tailored 
+state_space:        Describes the state space of the execution agent, tailored 
                     for execution tasks with components 
                     like bids, asks, and trades.
-reset_env:          Resets the environment to a specific state for execution. 
-                    It selects a new data window, initializes the order book, 
-                    and sets the initial state for execution tasks.
+reset_env:          Resets the execution agent to a specific state for execution. 
+                    It works within the MARLEnv framework to coordinate 
+                    with the base environment reset.
 _getActionMsgs:      Generates action messages based on 
                     the current state and action. 
                     It determines the type, side, quantity, 
                     and price of orders to be executed.
                     including detailed order book information and trade history
 _get_obs:           Constructs and returns the current observation for the 
-                    execution environment, derived from the state.
-_get_state_from_data:
-_reshape_action:
-_best_prices_impute
-_get_reward:
-name, num_actions:  Inherited methods providing the name of the environment 
-                    and the number of possible actions.
-
-
-                
+                    execution environment, derived from the state.      
 _get_data_messages: Inherited method to fetch market messages for a given 
                     step from all available messages.
 """

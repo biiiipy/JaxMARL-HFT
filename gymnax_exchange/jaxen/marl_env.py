@@ -1,3 +1,41 @@
+"""
+Multi-Agent Reinforcement Learning Environment for Limit Order Book Trading
+
+University of Oxford
+Corresponding Author: 
+Valentin Mohl (valentin.mohl@cs.ox.ac.uk)
+Reuben Leyland (Reuben.leyland@sky.com)
+Sascha Frey (sascha.frey@st-hughs.ox.ac.uk)
+
+
+Module Description
+This module provides the main multi-agent reinforcement learning environment 
+for limit order book trading using JAX for high-performance computations. 
+The MARLEnv coordinates multiple agent types (market makers, directional traders and execution agents) 
+within a shared trading environment, enabling multi-agent reinforcement learning 
+applications in financial markets.
+
+Key Components
+MARLEnv:         Main multi-agent environment class inheriting from MultiAgentEnv,
+                coordinating multiple agent types within a shared trading environment.
+MultiAgentState: Combined state class managing the shared world state and 
+                individual agent states.
+MultiAgentParams: Combined parameters class managing shared environment parameters
+                and individual agent parameters.
+
+Functionality Overview
+__init__:           Initializes the multi-agent environment, setting up the base
+                    environment and all agent types with their configurations.
+default_params:     Returns the combined parameters for the multi-agent environment,
+                    including shared base parameters and individual agent parameters.
+step:               Advances the multi-agent environment by processing actions from
+                    all agents and updating the shared world state.
+reset:              Resets the multi-agent environment to initial state, coordinating
+                    reset across all agent types.
+step_env:           Core environment step logic, processing all agent actions and
+                    updating the shared order book state.
+"""
+
 import os, sys, time, dataclasses
 from typing import Tuple, Optional, Dict
 import sys

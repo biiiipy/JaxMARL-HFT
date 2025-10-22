@@ -1,75 +1,58 @@
 """
-Market Making Environment for Limit Order Book with variable start time for episodes. 
+Market Making and Directional Trading Environment for Limit Order Book with variable start time for episodes. 
 
 University of Oxford
 Corresponding Author: 
-Kang Li     (kang.li@keble.ox.ac.uk)
+Valentin Mohl (valentin.mohl@cs.ox.ac.uk)
+Reuben Leyland (Reuben.leyland@sky.com)
 Sascha Frey (sascha.frey@st-hughs.ox.ac.uk)
-Peer Nagy   (peer.nagy@reuben.ox.ac.uk)
-V1.0 
+Kang Li     (kang.li@keble.ox.ac.uk)
 
 
 
 Module Description
-This module extends the base simulation environment for limit order books 
- using JAX for high-performance computations, specifically tailored for 
- execution tasks in financial markets. It is particularly designed for 
- reinforcement learning applications focusing on 
- optimal trade execution strategies.
+This module provides a market making or directional trading agent for multi-agent reinforcement learning 
+ in limit order book environments using JAX for high-performance computations. 
+ The MarketMakingAgent is designed to work within a MARLEnv framework, 
+ specifically tailored for market making and directional trading tasks in financial markets. 
+ 
 
 Key Components
-MMEnvState:   Dataclass to encapsulate the current state of the environment, 
-            including the raw order book, trades, and time information.
-MMEnvParams:  Configuration class for environment-specific parameters, 
-            such as task details, message and book data, and episode timing.
-MarketMakingEnv: Environment class inheriting from BaseLOBEnv, 
-              offering specialized methods for order placement and 
-              execution tasks in trading environments. 
+MMEnvState:   Dataclass to encapsulate the current state of the agent, 
+            including inventory, position, and market information.
+MMEnvParams:  Configuration class for agent-specific parameters, 
+            such as trader ID, time delays, and normalization settings.
+MarketMakingAgent: Agent class that works within the MARLEnv framework, 
+              offering specialized methods for market making and directional trading 
+              strategies and order placement in multi-agent trading environments. 
 
 
 Functionality Overview
-__init__:           Initializes the execution environment, setting up paths 
-                    for data, action types, and task details. 
-                    It includes pre-processing and initialization steps 
-                    specific to execution tasks.
-default_params:     Returns the default parameters for execution environment,
-                    adjusting for tasks such as buying or selling.
-step_env:           Advances the environment by processing actions and market 
-                    messages. It updates the state and computes the reward and 
-                    termination condition based on execution-specific criteria.
-reset_env:          Resets the environment to a state appropriate for a new 
-                    execution task. Initializes the order book and sets initial
-                    state specific to the execution context.
+__init__:           Initializes the agent, setting up configuration 
+                    for action types and trading strategies. It includes 
+                    initialization steps specific to market making and directional 
+                    trading tasks within the MARL framework.
+default_params:     Returns the default parameters for the agent,
+                    adjusting for market making and directional trading strategies.
+step_env:           Processes actions and generates action messages for the 
+                    agent. It works within the MARLEnv framework to 
+                    contribute to the overall environment step.
+reset_env:          Resets the agent to a state appropriate for a new 
+                    trading task. Works in coordination with the MARLEnv reset.
 is_terminal:        Checks whether the current state is terminal, based on 
                     the number of steps executed or tasks completed.
 
-action_space:       Defines the action space for execution tasks, including 
-                    order types and quantities.
-observation_space:  Define the observation space for execution tasks.
-state_space:        Describes the state space of the environment, tailored 
-                    for execution tasks with components 
-                    like bids, asks, and trades.
-reset_env:          Resets the environment to a specific state for execution. 
-                    It selects a new data window, initializes the order book, 
-                    and sets the initial state for execution tasks.
+action_space:       Defines the action space for market making and directional trading 
+                    tasks, including quantities, and types of orders sent
+observation_space:  Define the observation space for market making and directional 
+                    trading tasks.
 _getActionMsgs:      Generates action messages based on 
                     the current state and action. 
                     It determines the type, side, quantity, 
                     and price of orders to be executed.
                     including detailed order book information and trade history
 _get_obs:           Constructs and returns the current observation for the 
-                    execution environment, derived from the state.
-_get_state_from_data:
-_reshape_action:
-_best_prices_impute
-_get_reward:
-name, num_actions:  Inherited methods providing the name of the environment 
-                    and the number of possible actions.
-
-
-                
-_get_data_messages: Inherited method to fetch market messages for a given 
-                    step from all available messages.
+                    agent, derived from the state.
 """
 
 # from jax import config
