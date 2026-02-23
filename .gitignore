@@ -94,17 +94,20 @@ outputs/**
 /cache/**
 
 /gymnax_exchange/jaxen/Timing_speed/** */
-/gymnax_exchange/jaxen/Timing_speed/**
+
 .netrc
-/gymnax_exchange/jaxen/output/**
-/old/.netrc
 
 /go/*
 .config/*
 saved_npz/**
 saved_npz/
-.netrc
-/checkpoints/**
-.gitconfig
 
 test.py
+
+data/*
+scratch/*
+lob_bench/*
+debug_output/*
+jax_trace/*
+.ipython/*
+baseline_sweep_results/*

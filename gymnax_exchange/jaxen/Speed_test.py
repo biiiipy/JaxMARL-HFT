@@ -13,7 +13,6 @@ from functools import partial
 from typing import Any
 from gymnax_exchange.utils import utils as util
 import pandas as pd
-from datetime import datetime
 #from typing import List, Tuple
 
 # for debugging
@@ -39,10 +38,8 @@ from gymnax_exchange.jaxen.marl_env import MARLEnv
 
 
 def main():
-    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_name = f"timing_results_4000_50_compile_before_save_obs_shuffle_action_messages_{current_datetime}"
-    output_file_name = output_name + ".txt"
-    output_file_path = "/home/myuser/gymnax_exchange/jaxen/Timing_speed/" + output_file_name
+
+    output_file_path = "/home/myuser/gymnax_exchange/jaxen/Timing_speed/timing_results_4000_50_compile_before_save_obs.txt"
     #with open(output_file_path, "w") as f:
     #    f.write(f"Running with {10} envs and {10} steps\n")
 
@@ -269,7 +266,7 @@ def main():
                             # print("=" * 60)
 
     df = pd.DataFrame(results)
-    df.to_csv("/home/myuser/gymnax_exchange/jaxen/Timing_speed/" + output_name + ".csv", index=False)
+    df.to_csv("/home/myuser/gymnax_exchange/jaxen/Timing_speed/timing_results_4000_50_compile_before_save_obs.csv", index=False)
 
 
 if __name__ == "__main__":

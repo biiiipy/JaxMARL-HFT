@@ -6,20 +6,18 @@ Corresponding Author:
 Sascha Frey (sascha.frey@st-hughs.ox.ac.uk)
 Kang Li     (kang.li@keble.ox.ac.uk)
 Peer Nagy   (peer.nagy@reuben.ox.ac.uk)
-Valentin Mohl (valentin.mohl@cs.ox.ac.uk)
-Reuben Leyland (Reuben.leyland@sky.com)
+V1.0
 
 Module Description
-This module provides the base simulation environment for limit order books 
- using JAX for high-performance computations. It serves as the foundation for 
- both single-agent and multi-agent reinforcement learning applications in 
- financial markets, providing core order book simulation functionality.
+This module offers an advanced simulation environment for limit order books 
+ using JAX for high-performance computations. It is designed for reinforcement
+ learning applications in financial markets.
 
 Key Components
-LoadedEnvState:   Dataclass to manage the state of the environment, 
-                  including order book states, trade records, and timing information.
-LoadedEnvParams:  Configuration class for environment parameters, 
-                  including message data, book data, and episode timing.
+EnvState:   Dataclass to manage the state of the environment, 
+            including order book states, trade records, and timing information.
+EnvParams:  Configuration class for environment parameters, 
+            including message data, book data, and episode timing.
 BaseLOBEnv: Main environment class inheriting from Gymnax's base environment, 
             providing methods for environment initialization, 
             stepping through time steps, and resetting the environment. 
@@ -39,6 +37,15 @@ reset_env:          Resets the environment to an initial state.
                     and sets the initial state.
 is_terminal:        Checks whether the current state is terminal, 
                     based on the elapsed time since the episode's start.
+get_obs:            Returns the current observation from environment's state.
+name:               Provides the name of the environment.
+num_actions:        Returns the number of possible actions in the environment.
+action_space:       Defines the action space of the environment, including 
+                    sides, quantities, and prices of actions.
+observation_space:  (Not implemented) Intended to define 
+                    the observation space of the environment.
+state_space:        Defines the state space of the environment, 
+                    including bids, asks, trades, and time.
 _get_data_messages: Fetches an array of messages for a given step 
                     within a data window.
 """
@@ -61,7 +68,7 @@ import chex
 from flax import struct
 import itertools
 from gymnax_exchange.jaxob import JaxOrderBookArrays as job
-from gymnax_exchange.jaxlobster.lobster_loader import LoadLOBSTER_resample
+from gymnax_exchange.jaxlobster.lobster_loader import LoadLOBSTER_resample,LoadLOBSTER
 #from gymnax_exchange.jaxlobster.gen_loader import GenLoader
 from gymnax_exchange.utils.utils import *
 import pickle
@@ -142,11 +149,7 @@ class BaseLOBEnv(environment.Environment):
         self.n_data_msg_per_step = cfg.n_data_msg_per_step
         self.day_start = cfg.day_start  # 09:30
         self.day_end = cfg.day_end  # 16:00
-        self.nOrdersPerSide=cfg.nOrdersPerSide #100
-        self.nTradesLogged=cfg.nTradesLogged
         self.book_depth=cfg.book_depth
-        self.n_ticks_in_book = cfg.n_ticks_in_book 
-        self.customIDCounter=cfg.customIDCounter
         self.tick_size=cfg.tick_size
         self.start_resolution = cfg.start_resolution  # Use value from config
         self.cfg = cfg
@@ -162,7 +165,7 @@ class BaseLOBEnv(environment.Environment):
                                 day_end=self.day_end,
                                 stock=self.cfg.stock,
                                 time_period=self.cfg.timePeriod) 
-        msgs,starts,ends,books,max_messages_arr=loader.run_loading()
+        msgs,starts,ends,books,max_messages_arr=loader.run_loading(self._get_filename_suffix())
 
 
         self.max_messages_in_episode_arr = max_messages_arr
@@ -188,7 +191,7 @@ class BaseLOBEnv(environment.Environment):
         self, key: chex.PRNGKey, state: LoadedEnvState, action: Dict, params: LoadedEnvParams
     ) -> Tuple[chex.Array, LoadedEnvState, float, bool, dict]:
         #Obtain the messages for the step from the message data
-        data_messages=self._get_data_messages(params.message_data,
+        data_messages=self.get_data_messages(params.message_data,
                                               state.start_index,
                                               state.step_counter,
                                               state.init_time[0]+self.cfg.episode_time)
@@ -220,14 +223,14 @@ class BaseLOBEnv(environment.Environment):
             self.cfg.window_selector == -1,
             jax.random.randint(key, minval=0, maxval=self.n_windows, shape=()),  
             jnp.array(self.cfg.window_selector, dtype=jnp.int32))
-        #jax.debug.print("idx_data_window: {}", idx_data_window)
         first_state = index_tree(params.init_states_array, idx_data_window)
-        # def debug_callback(first_state,idx_data_window):
-        #     if idx_data_window == 427:  # Debugging for specific window index
+        # def debug_callback(selector,first_state,idx_data_window):
+        #     print("THe window selector is:",selector)
+        #     if idx_data_window == 2204:  # Debugging for specific window index
         #         print("Debugging reset for window index:", idx_data_window)
         #         print("Resetting environment to initial state for window index:", first_state.window_index)
         #         print("First state details:", first_state)
-        # jax.debug.callback(debug_callback, first_state, idx_data_window)
+        # jax.debug.callback(debug_callback, self.cfg.window_selector,first_state, idx_data_window)
         return 0,first_state
     
     def _internal_terminal_debug(self, state: LoadedEnvState, params: LoadedEnvParams,time : chex.Array) -> bool:
@@ -293,51 +296,47 @@ class BaseLOBEnv(environment.Environment):
 )
 
     def _init_states(self,key,alphatradePath,starts):
-        print("START:  pre-reset in the initialization")
+        print(f"{self.__class__.__name__} _init_states:  pre-reset in the initialization")
         os.makedirs(alphatradePath + '/pre_reset_states/', exist_ok=True)
         pkl_file_name = (alphatradePath + '/pre_reset_states/'
-                         + 'ResetState_window_resolution_' + str(self.cfg.start_resolution)
-                         + '_eptype_"' + str(self.cfg.ep_type)
-                         + '"_depth_' + str(self.cfg.book_depth)
-                         + "_stock_" + str(self.cfg.stock)
-                         + "_windowidx_"+str(self.cfg.window_selector)
-                         + "_nMsgPerStep_"+str(self.cfg.n_data_msg_per_step)
-                         + "_episode_time_"+str(self.cfg.episode_time)
-                         + "_TimePeriod_"+str(self.cfg.timePeriod)
+                         + 'ResetStates_' 
+                         + str(self.__class__.__name__) + '_'
+                         + self._get_filename_suffix()
                          + '.pkl')
-        print("pre-reset will be saved to ", pkl_file_name)
+
+        print(f"{self.__class__.__name__} _init_states: pre-reset will be saved to or loaded from \n\t{pkl_file_name}")
         try:
             if self.cfg.use_pickles_for_init:
                 with open(pkl_file_name, 'rb') as f:
                     self.init_states_array = pickle.load(f)
-                    print("LOADING STATES FROM PKL...")
+                    print(f"{self.__class__.__name__} _init_states: initial states have been loaded successfully")
             else:
                 raise ValueError("Throw error so re-computes")
         except:
-            print("COMPUTING INIT STATES...")
-            #for i in range(self.n_windows):
-                #print("message starts",self.messages[starts[i]])
+            print(f"{self.__class__.__name__} _init_states: computing initial states afresh from orderbook data")
+
             get_state_jitted= jax.jit(self._get_state_from_data)
 
             states = [get_state_jitted(key,
-                                                self.messages[starts[i]],
-                                                self.books[i],
-                                                self.max_messages_in_episode_arr[i]
-                                                    //self.n_data_msg_per_step+1,
-                                                    i,
-                                                    starts[i]) 
+                                        self.messages[starts[i]],
+                                        self.books[i],
+                                        self.max_messages_in_episode_arr[i]
+                                            //self.n_data_msg_per_step+1,
+                                            i,
+                                            starts[i]) 
                         for i in range(self.n_windows)]
             self.init_states_array=tree_stack(states)
-            print("SAVING STATES TO PKL...")
+            
             with open(pkl_file_name, 'wb') as f:
                 pickle.dump(self.init_states_array, f)
-        print("DONE: pre-reset in the initialization")
+            print(f"{self.__class__.__name__} _init_states: saved initial states successfully")
+        print(f"{self.__class__.__name__} _init_states: All initial reset states are ready.")
 
     def _get_obs(self, state: LoadedEnvState, params:LoadedEnvParams) -> chex.Array:
         """Return dummy observation."""
         return 0
     
-    def _get_data_messages(self,messageData,start,step_counter,end_time_s):
+    def get_data_messages(self,messageData,start,step_counter,end_time_s):
         """Returns an array of messages for a given step. 
             Parameters:
                     messageData (Array): 2D array of all msgs with
@@ -395,7 +394,21 @@ class BaseLOBEnv(environment.Environment):
             quant_bid_passive_2 = job.get_volume_at_price(state.bid_raw_orders, bid_passive_2)
             quant_ask_passive_2 = job.get_volume_at_price(state.ask_raw_orders, ask_passive_2)
             return bid_passive_2,quant_bid_passive_2,ask_passive_2,quant_ask_passive_2
-        
+
+    def _get_filename_suffix(self):
+        filename_params = [
+            str(self.cfg.stock),
+            str(self.cfg.timePeriod),
+            str(self.cfg.book_depth),
+            str(self.cfg.ep_type),
+            str(self.cfg.episode_time),
+            str(self.cfg.start_resolution),
+            str(self.n_data_msg_per_step),
+            str(self.day_start),
+            str(self.day_end),
+        ]
+        filename_params_str= "_".join(filename_params)
+        return filename_params_str
 
 
     @property
@@ -420,14 +433,14 @@ class BaseLOBEnv(environment.Environment):
             }
         )
 
-    # Not used.
+    #TODO: define obs space (4xnDepth) array of quants&prices. Not that important right now. 
     def observation_space(self, params: LoadedEnvParams):
         """Observation space of the environment."""
         return NotImplementedError
 
-    # Not used.
     def state_space(self, params: LoadedEnvParams) -> spaces.Dict:
-        """State space of the environment.  # Not used.
+        """State space of the environment. #FIXME Samples absolute
+          nonsense, don't use.
         """
         return spaces.Dict(
             {

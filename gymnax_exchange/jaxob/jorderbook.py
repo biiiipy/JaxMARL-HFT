@@ -5,7 +5,7 @@ from readline import remove_history_item
 from typing import Dict, NamedTuple, Optional, Tuple
 from unicodedata import bidirectional
 import gymnax_exchange.jaxob.JaxOrderBookArrays as job
-from gymnax_exchange.jaxob.jaxob_config import Configuration
+from gymnax_exchange.jaxob.jaxob_config import JAXLOB_Configuration
 job = importlib.reload(job)
 import jax
 from jax import numpy as jnp
@@ -25,9 +25,9 @@ class LobState(NamedTuple):
 class OrderBook():
     def __init__(
             self: 'OrderBook',
-            cfg: Optional[Configuration] = None,
+            cfg: Optional[JAXLOB_Configuration] = None,
         ) -> None:
-        self.cfg = cfg if cfg is not None else Configuration()
+        self.cfg = cfg if cfg is not None else JAXLOB_Configuration()
 
     @jax.jit
     def init(self: 'OrderBook') -> LobState:
@@ -238,6 +238,7 @@ class OrderBook():
             side: int,
             time_s: int,
             time_ns: int,
+            price : Optional[int] = None,
         ) -> jax.Array:
         ''' '''
         side_array = jax.lax.cond(
@@ -246,7 +247,10 @@ class OrderBook():
             lambda a, b: a,
             state.asks, state.bids
         )
-        return job.get_order_by_time(side_array, time_s, time_ns)
+        if price is not None:
+            return job.get_order_by_time_and_price(side_array, time_s, time_ns, price)
+        else:
+            return job.get_order_by_time(side_array, time_s, time_ns)
 
         
     @jax.jit

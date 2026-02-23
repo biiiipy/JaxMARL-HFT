@@ -6,7 +6,7 @@
 "NUM_STEPS": 128
 "TINY_RUN": False
 
-# "NUM_ENVS": 8
+# "NUM_ENVS": 16
 # "NUM_STEPS": 64
 # "TINY_RUN": True
 
@@ -15,7 +15,7 @@
 "NUM_AGENTS_PER_TYPE": [1,1]
 "SEED": 34
 "N_DEVICES": 1
-"FIXED_ACTIONS" : [[0],[0]]
+"FIXED_ACTIONS" : [[1],[0]]
 
 # WandB Params
 "ENTITY": "oxford-lob"
@@ -24,33 +24,28 @@
 
 # High-Level Params
 "CALC_EVAL" : False
-"EvalTimePeriod" : "2024_Eval" #"2024"
+"EvalTimePeriod" : "2024_Dec" #"2024"
 
 
 #Network params that must be manually matched with the config used in the original training
-"GRU_HIDDEN_DIM": 128
-"FC_DIM_SIZE": 128
+"GRU_HIDDEN_DIM": 256
+"FC_DIM_SIZE": 256
 #Training params which are irellevant for the eval.
 "ANNEAL_LR": True
 "LR": 20
 "MAX_GRAD_NORM" : 25
 
+"ENV_CONFIG": "config/env_configs/2_player_fq_fqc.json"
 
-"RESTORE_PROJECT" : "v4_2Player_various_act_reward_spaces"
-"RESTORE_RUN" : "fluent-sweep-3"
+"RESTORE_PROJECT" : "2PLayer"
+"RESTORE_RUN" : "whole-sweep-1"
 
 
 
-"AGENT_CONFIGS" : {"MarketMaking" :{"inv_penalty": "quadratic",
-                                    "skew_multiplier": 10,
-                                    "action_space":"fixed_quants", #"spread_skew",,"fixed_quants"simple
-                                    "reward_space" : "spooner", # "spooner"buy_sell_pnl
+"AGENT_CONFIGS" : {"MarketMaking" :{
                                   },
-                  "Execution" : {"reward_lambda": 0.0,
-                                "fixed_quant_value": 10, #20 on fixed quants
-                                "action_space": "fixed_quants_complex", #fixed_quants,fixed_quants_complex
-                                 "task_size": 600,
-                                "doom_price_penalty": 0.1,}
+                  "Execution" : {
+                              }
                 }
 "BASELINE_CONFIGS" : {"MarketMaking" :{"action_space":"AvSt", #"spread_skew",,"fixed_quants"simple
                                     },

@@ -1,47 +1,3 @@
-"""
-State and Parameter Definitions for Multi-Agent Limit Order Book Trading
-
-University of Oxford
-Corresponding Author: 
-Valentin Mohl (valentin.mohl@cs.ox.ac.uk)
-Reuben Leyland (Reuben.leyland@sky.com)
-Sascha Frey (sascha.frey@st-hughs.ox.ac.uk)
-
-
-Module Description
-This module defines all state and parameter classes used across the multi-agent 
-reinforcement learning environment for limit order book trading. It provides 
-structured data classes for managing environment states, agent states, and 
-configuration parameters using JAX-compatible dataclasses.
-
-Key Components
-LoadedEnvState:    Base state class for the loaded environment, containing
-                   raw order book data, trades, and timing information, which is loaded from the data files.
-WorldState:        Extended state class with market information like best bids/asks,
-                   mid price, and order ID counter etc.
-MultiAgentState:   Combined state class managing the shared world state and
-                   individual agent states for multi-agent coordination.
-LoadedEnvParams:   Base parameters class for environment data and initialization.
-MultiAgentParams:  Combined parameters class for multi-agent coordination.
-MMEnvParams:       Market making and directional trading agent-specific parameters.
-ExecEnvParams:     Execution agent-specific parameters.
-MMEnvState:        Market making and directional trading agent state with inventory and position tracking.
-ExecEnvState:      Execution agent state with task-specific information.
-
-State Hierarchy
-- LoadedEnvState: Base environment state
-  - WorldState: Extended with market information
-    - MultiAgentState: Combined with agent states
-- MMEnvState: Market making agent state
-- ExecEnvState: Execution agent state
-
-Parameter Hierarchy  
-- LoadedEnvParams: Base environment parameters
-  - MultiAgentParams: Combined with agent parameters
-- MMEnvParams: Market making agent parameters
-- ExecEnvParams: Execution agent parameters
-"""
-
 import jax.numpy as jnp
 from flax import struct
 from typing import Any
@@ -61,9 +17,9 @@ class LoadedEnvState:
     bid_raw_orders: chex.Array
     trades: chex.Array
     init_time: chex.Array
-    window_index:int
-    max_steps_in_episode: int
-    start_index: int # This should be here because its the same for all agents, but it changes for all agents when resetting (this is why its not in Params)
+    window_index:int # i in [0, n_starts]
+    max_steps_in_episode: int 
+    start_index: int # s_i actual start pos in msg data
     step_counter: int
     
 
@@ -75,6 +31,7 @@ class WorldState(LoadedEnvState):
     best_asks: jnp.ndarray
     time: chex.Array
     order_id_counter: int
+    #Skip in writeup, redundant and should be removed. 
     mid_price:float
     delta_time: float
 
@@ -84,13 +41,14 @@ class WorldState(LoadedEnvState):
 class MultiAgentState():
     # Sub–state for market maker and execution agent.
     world_state: WorldState
-
     agent_states: list[Any]
 
 
 
 @struct.dataclass
 class MMEnvState():
+    posted_distance_bid: int
+    posted_distance_ask: int
     inventory: int
     total_PnL: float
     cash_balance: float
@@ -101,15 +59,18 @@ class ExecEnvState():
     init_price: int
     task_to_execute: int
     quant_executed: int
-    # rewards
+    is_sell_task: int
+    # rewards total over ep.
+    p_vwap : float
     total_revenue: float
     drift_return: float
     advantage_return: float
+    # Rolling means for reward components
     slippage_rm: float
     price_adv_rm: float
     price_drift_rm: float
     vwap_rm: float
-    is_sell_task: int
+    #Skip, not sure what the purpose is
     trade_duration: float
 
 
