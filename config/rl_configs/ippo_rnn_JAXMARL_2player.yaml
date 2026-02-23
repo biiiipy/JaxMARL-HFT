@@ -28,14 +28,14 @@
 "ANNEAL_LR": [True,True]
 
 # WandB Params
-"ENTITY": "oxford-lob"
+"ENTITY": "your-wandb-entity"
 "PROJECT": "2PLayer" #"v4_2Player_reference_price_ablation" #"DEBUG"
 "WANDB_MODE" : "online"
 
 # High-Level Params
-"CALC_EVAL" : True
+"CALC_EVAL" : False
 "TimePeriod" : "2024"
-"EvalTimePeriod" : "2024_Dec"
+"EvalTimePeriod" : "2024"
 "Calculate Baseline" : False
 "Timing" : False
 

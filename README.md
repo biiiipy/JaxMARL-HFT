@@ -11,67 +11,82 @@ A JAX-based framework for multi-agent reinforcement learning for high-frequency 
 - **Scalable**: Handles thousands of parallel environments
 - **Heterogeneous Agents**: Supports different observation/action spaces
 
-## Quick Start
+## Getting Started
 
-### Docker Setup
-
-```bash
-# Set up data directory
-mkdir -p ~/data
-```
-
-**Note**: Configure the Makefile for your specific environment (GPU device, data directory path, etc.)
+### 1. Clone and install
 
 ```bash
-# Build and run with Docker
-make build
-make run
+conda create -n jaxmarl_hft python=3.10
+conda activate jaxmarl_hft
+pip install "jax[cuda12]"
+pip install -r requirements.txt
 ```
 
-### Training
+Requires Python 3.8+ and a CUDA-capable GPU.
+
+### 2. Get LOBSTER data
+
+You need [LOBSTER](https://data.lobsterdata.com/info/WhatIsLOBSTER.php) limit order book data. Each trading day needs a matched pair of `message` and `orderbook` CSV files.
+
+Create the following directory structure inside the repo (or anywhere — you'll point to it in the config):
+
+```
+data/rawLOBSTER/<STOCK>/<TIME_PERIOD>/
+├── <STOCK>_<DATE>_34200000_57600000_message_10.csv
+└── <STOCK>_<DATE>_34200000_57600000_orderbook_10.csv
+```
+
+For example, for GOOG data from 2022:
+```
+data/rawLOBSTER/GOOG/2022/
+├── GOOG_2022-01-03_34200000_57600000_message_10.csv
+├── GOOG_2022-01-03_34200000_57600000_orderbook_10.csv
+└── ...
+```
+
+### 3. Edit the environment config
+
+Pick an environment config from `config/env_configs/` (recommended starting point: `2_player_fq_fqc.json` for multi-agent market making + execution) and set these fields in the `world_config` section:
+
+```json
+"alphatradePath": "/absolute/path/to/JaxMARL-HFT",
+"dataPath": "/absolute/path/to/JaxMARL-HFT/data",
+"stock": "GOOG",
+"timePeriod": "2022"
+```
+
+`alphatradePath` is the repo root (used for caching and checkpoints), `dataPath` is the parent of `rawLOBSTER/`, `stock` matches your data folder name, and `timePeriod` is the subfolder under `rawLOBSTER/<stock>/`.
+
+Also set `TimePeriod` in your training config (`config/rl_configs/*.yaml`) to match.
+
+### 4. Run training
 
 ```bash
-# Run IPPO training (from the repo root)
-python3 gymnax_exchange/jaxrl/MARL/ippo_rnn_JAXMARL.py
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+
+# Multi-agent (market making + execution)
+python3 gymnax_exchange/jaxrl/MARL/ippo_rnn_JAXMARL.py \
+    --config-name="ippo_rnn_JAXMARL_2player" \
+    WANDB_MODE="disabled"
 ```
 
-## Setup
+The first run preprocesses the LOBSTER data and caches it. Subsequent runs are much faster. Additional training configs are in `config/rl_configs/`. You can override any config value from the command line using [Hydra](https://hydra.cc/) syntax (e.g. `TOTAL_TIMESTEPS=50000 NUM_ENVS=64`).
 
-### Paths to configure
+### 5. WandB (optional)
 
-Before running, you need to set several paths in the configuration files:
+To enable [Weights & Biases](https://wandb.ai/) experiment tracking, run `wandb login` and then add `WANDB_MODE="online" ENTITY="your-wandb-entity" PROJECT="your-project-name"` to the training command. These can also be set directly in the YAML configs (`config/rl_configs/*.yaml`). The YAML configs support [WandB sweeps](https://docs.wandb.ai/guides/sweeps) — when a `SWEEP_PARAMETERS` section is present and `WANDB_MODE` is not `"disabled"`, training automatically creates a sweep.
 
-**Environment config** (`config/env_configs/*.json`) — in the `world_config` section:
-- **`alphatradePath`**: Path to the repo root. Used for caching preprocessed data (`pre_reset_states/`) and saving checkpoints (`checkpoints/`).
-- **`dataPath`**: Path to your data directory (see Data section below).
-- **`stock`**: Stock ticker (e.g. `"GOOG"`, `"AMZN"`)
-- **`timePeriod`**: Subdirectory name for the time period (must match the folder name under `rawLOBSTER/<stock>/`)
+## Docker Setup (alternative)
 
-**Training config** (`config/rl_configs/*.yaml`):
-- **`TimePeriod`**: Time period for training data (must match `timePeriod` in the env config)
-- **`EvalTimePeriod`**: Time period for evaluation data
-- **`ENV_CONFIG`**: Path to the environment config JSON file (e.g. `"config/env_configs/2_player_fq_fqc.json"`)
+For **x86_64/amd64 only** (base image: `nvcr.io/nvidia/jax`). Edit the `Makefile` to set `DATADIR` to your LOBSTER data directory, then:
 
-### Data
-
-The framework expects [LOBSTER](https://lobsterdata.com/) market data organised as:
-```
-<dataPath>/rawLOBSTER/<stock>/<timePeriod>/
-├── <stock>_<date>_<...>_message_<...>.csv
-└── <stock>_<date>_<...>_orderbook_<...>.csv
+```bash
+make build              # build image
+make run                # interactive shell
+make ppo_2player gpu=0  # run training on GPU 0
 ```
 
-### WandB
-
-By default, training uses [Weights & Biases](https://wandb.ai/) sweeps for hyperparameter search. Configure in the RL YAML config (`config/rl_configs/`):
-
-```yaml
-ENTITY: "your-wandb-entity"
-PROJECT: "your-project-name"
-WANDB_MODE: "online"
-```
-
-To run **without WandB**, set `WANDB_MODE: "disabled"` and leave `SWEEP_PARAMETERS` empty in your YAML config. This runs a single training directly.
+The repo is mounted at `/home/myuser/` and data at `/home/myuser/data/`, so the default env config paths work without modification. For WandB, set `export WANDB_API_KEY=<your-key>` before running.
 
 ## Agent Types
 
@@ -130,12 +145,6 @@ Edit YAML files in `config/rl_configs/` to customize:
 - Market data settings (resolution, episode length)
 
 Environment configurations are in `config/env_configs/`.
-
-## Requirements
-
-- Python 3.8+
-- CUDA-compatible GPU (recommended)
-- JAX, Flax, and related dependencies (see `requirements.txt`)
 
 ## Citation
 

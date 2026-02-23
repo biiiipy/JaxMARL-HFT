@@ -1000,7 +1000,7 @@ def get_ma_config(config, policy_choice, combo_desc):
 
 
 
-@hydra.main(version_base=None, config_path="config", config_name="baseline_exec_config.yaml")
+@hydra.main(version_base="1.3", config_path="config", config_name="baseline_exec_config.yaml")
 def seperate_main(config):
     try:
         if config["ENV_CONFIG"] is not None:

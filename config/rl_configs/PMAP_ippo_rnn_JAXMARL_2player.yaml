@@ -27,12 +27,13 @@
 "ANNEAL_LR": [True,True]
 
 # WandB Params
-"ENTITY": "oxford-lob"
+"ENTITY": "your-wandb-entity"
 "PROJECT": "PMAP_SPEED" #"DEBUG"
 "WANDB_MODE" : "online"
 
 # High-Level Params
 "CALC_EVAL" : False
+"TimePeriod" : "2024"
 "EvalTimePeriod" : "2024_Eval"
 "Calculate Baseline" : False
 "Timing" : True

@@ -849,7 +849,7 @@ def make_train(config):
     return train
 
 
-@hydra.main(version_base=None, config_path="../../../config/rl_configs", config_name="PMAP_ippo_rnn_JAXMARL_2player")
+@hydra.main(version_base="1.3", config_path="../../../config/rl_configs", config_name="PMAP_ippo_rnn_JAXMARL_2player")
 def main(config):
     print("MultiAgentConfig", MultiAgentConfig().world_config)
     env_config=OmegaConf.structured(MultiAgentConfig(number_of_agents_per_type=config["NUM_AGENTS_PER_TYPE"]))
@@ -976,7 +976,7 @@ def main(config):
 
     sys.exit(0)
 
-@hydra.main(version_base=None, config_path="../../../config/rl_configs", config_name="PMAP_ippo_rnn_JAXMARL_2player")
+@hydra.main(version_base="1.3", config_path="../../../config/rl_configs", config_name="PMAP_ippo_rnn_JAXMARL_2player")
 def seperate_main(config):
     print("MultiAgentConfig", MultiAgentConfig().world_config)
     env_config=OmegaConf.structured(MultiAgentConfig(number_of_agents_per_type=config["NUM_AGENTS_PER_TYPE"]))

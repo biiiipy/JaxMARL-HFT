@@ -1,6 +1,8 @@
 **.csv
 .idea/**/
 **.pyc
+__pycache__/
+config/env_configs/default_config_*.json
 .idea/**
 .spyproject/**
 .DS_Store

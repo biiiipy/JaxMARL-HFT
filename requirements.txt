@@ -1,11 +1,3 @@
-# Core ML and Scientific Computing
-numpy
-pandas
-matplotlib
-scipy
-scikit-learn
-statsmodels
-
 # JAX
 jax[cuda12]
 optax
@@ -14,65 +6,28 @@ chex
 dm-tree
 ml-dtypes
 
-# Deep Learning
-# torch
-# torchvision
-# torchaudio
+# Core
+numpy
+pandas
+matplotlib
 
-# RL and Environment Libraries
-gym
-dm-env
-brax==0.12.*
+# RL
 gymnax
-mujoco
-
-# Jupyter and Development
-jupyter
-# jupyterlab
-ipython
-ipykernel
-notebook
-# ipywidgets
-
-# Web and API
-Flask
-Flask-Cors
-requests
-
-# Visualization and Plotting
-tensorboard
-tensorboardX
-wandb
-plotly==5.22.0
-kaleido==0.1.*
-
-# Utility Libraries
-tqdm
-click
-PyYAML
-pillow
-joblib
-cloudpickle
-hydra-core
-
-# Development and Testing
-pytest
-pytest-cov
-
-
-
-# Specialized Libraries
-einops
-trimesh
-PyOpenGL
 distrax
-evosax
-ml-collections
-orbax-checkpoint==0.11.18
-ray
-xgboost
 
-# Core Dependencies
+# Config
+hydra-core
+PyYAML
+
+# Checkpoints
+orbax-checkpoint==0.11.18
+
+# Logging
+wandb
+tqdm
+
+# Utilities
+cloudpickle
 absl-py
 packaging
 typing-extensions

@@ -445,9 +445,9 @@ def make_train(config):
         dict_of_agents_configs=agent_configs,
         world_config=World_EnvironmentConfig(
             seed=config["SEED"],
-            timePeriod=config["TimePeriod"],
+            timePeriod=str(config["TimePeriod"]),
             # Only override parameters that exist in both config and World_EnvironmentConfig
-            **{k: v for k, v in config["world_config"].items() 
+            **{k: v for k, v in config["world_config"].items()
             if hasattr(World_EnvironmentConfig(), k) and k not in ["seed",
                                                                     "timePeriod",
                                                                 ]}
@@ -466,7 +466,7 @@ def make_train(config):
                     dict_of_agents_configs=eval_agent_configs,
                     world_config=World_EnvironmentConfig(
                         seed=config["SEED"],
-                        timePeriod=config["EvalTimePeriod"],
+                        timePeriod=str(config["EvalTimePeriod"]),
                         # Only override parameters that exist in both config and World_EnvironmentConfig
                         **{k: v for k, v in config["world_config"].items() 
                         if hasattr(World_EnvironmentConfig(), k) and k not in ["seed",
@@ -1142,7 +1142,7 @@ def make_train(config):
     return train
 
 
-@hydra.main(version_base=None, config_path="../../../config/rl_configs", config_name="ippo_rnn_JAXMARL_exec")
+@hydra.main(version_base="1.3", config_path="../../../config/rl_configs", config_name="ippo_rnn_JAXMARL_exec")
 def main(config):
     try:
         if config["ENV_CONFIG"] is not None:

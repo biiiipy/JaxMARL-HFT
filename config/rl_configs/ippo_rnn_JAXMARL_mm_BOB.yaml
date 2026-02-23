@@ -27,7 +27,7 @@
 "ANNEAL_LR": [True]
 
 # WandB Params
-"ENTITY": "oxford-lob"
+"ENTITY": "your-wandb-entity"
 "PROJECT": "v0_MM_BobRL" #"v4_2Player_reference_price_ablation" #"DEBUG"
 "WANDB_MODE" : "online"
 SWEEP_PARAMETERS:

@@ -27,7 +27,7 @@
 "ANNEAL_LR": [True]
 
 # WandB Params
-"ENTITY": "oxford-lob"
+"ENTITY": "your-wandb-entity"
 "PROJECT": "v2Exec_FixedQuantsComplex_Long" #"Exec_FixedPrice_Long" #"DEBUG"Exec_FixedQuantsComplex_Long
 "WANDB_MODE" : "online"
 

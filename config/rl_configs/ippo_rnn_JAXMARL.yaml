@@ -21,13 +21,19 @@
 "ENV_NAME": "JAXMARL-Lob-v0"
 "NUM_AGENTS_PER_TYPE": [1, 1]
 "SEED": 1
-# "ENV_KWARGS": 
-#     "LIST_OF_AGENTS_CONFIGS: []
-#     "NUM_AGENTS_PER_TYPE": True
-# #   "attack_mode": "closest"
+"N_DEVICES": 1
+"ENV_CONFIG": "config/env_configs/2_player_fq_fqc.json"
 "ANNEAL_LR": [True, True]
+"NUM_STEPS_EVAL": 256
 
 # WandB Params
-"ENTITY": "oxford-lob"
+"ENTITY": "your-wandb-entity"
 "PROJECT": "JAXMARL-LOB_GOOG_2019_two_agents"
-"WANDB_MODE" : "online"
+"WANDB_MODE" : "disabled"
+
+# High-Level Params
+"CALC_EVAL" : False
+"TimePeriod" : "2024"
+"EvalTimePeriod" : "2024"
+"Calculate Baseline" : False
+"Timing" : False

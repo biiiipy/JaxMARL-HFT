@@ -1,3 +1,29 @@
+# ============================================================
+# JaxMARL-HFT Docker Image
+# ============================================================
+# NOTE: This image is x86_64/amd64 only (NVIDIA base image).
+#       It will NOT work on ARM64 systems (e.g. Apple Silicon, AWS Graviton).
+#
+# Build:  make build
+# Run:    make run            (opens interactive shell)
+#         make ppo_2player gpu=0   (runs 2-player training on GPU 0)
+#
+# The Makefile mounts:
+#   - The repo          -> /home/myuser/
+#   - Your data dir     -> /home/myuser/data/
+#   - Your scratch dir  -> /home/myuser/scratch/
+#
+# So inside the container, the default env config paths
+# (alphatradePath="/home/myuser", dataPath="/home/myuser/data")
+# work without modification.
+#
+# For WandB logging, set your API key before running:
+#   export WANDB_API_KEY=<your-key>
+#   make ppo_2player gpu=0
+# Or pass it via docker run:
+#   docker run -e WANDB_API_KEY=<your-key> ...
+# ============================================================
+
 FROM nvcr.io/nvidia/jax:25.10-py3
 # Create user
 ARG UID
@@ -5,14 +31,13 @@ ARG MYUSER
 RUN useradd -m -u $UID --create-home ${MYUSER} && \
     echo "${MYUSER}: ${MYUSER}" | chpasswd && \
     adduser ${MYUSER} sudo && \
-    # mkdir -p /home/${MYUSER}/.local/bin && \
     chown -R  ${MYUSER}:${MYUSER} /home/${MYUSER}
-    
+
 # default workdir
 WORKDIR /home/${MYUSER}/
 COPY --chown=${MYUSER} --chmod=777 . .
 
-# install tmux
+# Install system packages
 RUN apt-get update && \
     apt-get install -y tmux && \
     apt-get install -y \
@@ -23,61 +48,30 @@ RUN apt-get update && \
     p7zip-full \
     unrar \
     htop \
-    graphviz 
-    # libcupti-dev
+    graphviz
 
-# Copy requirements.txt and verify its contents
-COPY --chown=${MYUSER}:${MYUSER} requirements.txt /home/${MYUSER}/AlphaTrade/
-
-RUN ls -l && cat requirements.txt
-
-#jaxmarl from source if needed, all the requirements
-# RUN pip install -e .[algs,dev]
-
+# Install Python dependencies
 RUN pip install --upgrade pip setuptools wheel && \
     pip install -r requirements.txt
 
-# # RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
-# # RUN pip uninstall -y jax jaxlib jax-plugins jax-cuda12-pjrt jax-cuda12-plugin nvidia-cusparse \
-# #                         nvidia-cusolver nvidia-cufft nvidia-nccl-cu12 nvidia-cudnn-cu12 \
-# #                         nvidia-cuda-cupti-cu12 nvidia-cublas-cu12 nvidia-cuda-nvcc-cu12 \
-# #                         nvidia-cuda-nvrtc-cu12 nvidia-cuda-runtime-cu12 nvidia-curand-cu12 \
-# #                         nvidia-nvjitlink-cu12 nvidia-nvtx-cu12
-
-# # RUN pip install -U "jax[cuda13]==0.7.2" "jaxlib[cuda13]==0.7.2" 
-# # -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-# # # 
-# # RUN pip install -r requirements.txt
-
+# Install Go (used for WandB internals)
 RUN wget https://go.dev/dl/go1.24.5.linux-amd64.tar.gz
 RUN rm -rf /usr/local/go
 RUN tar -C /usr/local -xzf go1.24.5.linux-amd64.tar.gz
-RUN export PATH=$PATH:/usr/local/go/bin
+ENV PATH="$PATH:/usr/local/go/bin"
 
 USER ${MYUSER}
 
-#disabling preallocation
-RUN export XLA_PYTHON_CLIENT_PREALLOCATE=false
-#safety measures
-RUN export XLA_PYTHON_CLIENT_MEM_FRACTION=0.25 
-RUN export TF_FORCE_GPU_ALLOW_GROWTH=true
-# Add .local/bin to PATH
-RUN echo 'export PATH=$PATH:/home/duser/.local/bin' >> ~/.bashrc
+# JAX memory settings — prevent OOM by disabling full preallocation
+ENV XLA_PYTHON_CLIENT_PREALLOCATE=false
+ENV XLA_PYTHON_CLIENT_MEM_FRACTION=0.25
+ENV TF_FORCE_GPU_ALLOW_GROWTH=true
 
-
-# Ensure home directory is on the Python path
+# Ensure repo root is on the Python path
 ENV PYTHONPATH="/home/${MYUSER}:$PYTHONPATH"
-RUN export PATH="$HOME/.local/bin:$PATH"
-RUN export PATH="$HOME/.local/lib:$PATH"
-# Uncomment below if you want jupyter 
-# RUN pip install jupyterlab
 
-# for secrets and debug
+# WandB credentials — set these via environment variables when running
+# e.g. docker run -e WANDB_API_KEY=<key> -e WANDB_ENTITY=<entity> ...
 ENV WANDB_API_KEY=""
 ENV WANDB_ENTITY=""
 RUN git config --global --add safe.directory /home/${MYUSER}
-
-
-# Probably unnecessary to configure git user, but uncomment if needed
-# RUN git config --global user.email "reuben@robots.ox.ac.uk" && \
-#     git config --global user.name "reuben"
